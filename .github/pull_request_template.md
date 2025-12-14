@@ -1,8 +1,3 @@
-# Pull Request Title
-Provide a clear and objective Title of what was changed in this pull request.
-
----
-
 ## Description
 Provide a clear and objective summary of what was changed in this pull request.
 
