@@ -1,0 +1,54 @@
+name: Continuous Integration (CI)
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Build project
+      run: npm run build
+
+  codex_review:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run Codex review
+      env:
+        CODEx_API_KEY: ${{ secrets.CODEx_API_KEY }} # Certifique-se de adicionar sua chave da API do Codex no GitHub Secrets
+      run: |
+        curl -X POST https://api.openai.com/v1/completions \
+        -H "Authorization: Bearer $CODEx_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "model": "code-davinci-002", 
+          "prompt": "Please review the following code for best practices, errors, and optimization suggestions:\n\n" + $(cat path_to_your_code_files),
+          "max_tokens": 200
+        }'
+
+    - name: Check Codex review result
+      run: |
+        # Aqui você pode implementar a lógica para processar a resposta do Codex (ex: verificar erros)
+        echo "Codex review completed"
